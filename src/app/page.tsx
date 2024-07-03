@@ -7,6 +7,9 @@ export default function Home() {
       <a href={PAGES.EYE_TRACKER}>
         <Button>Eye Tracker</Button>
       </a>
+      <a href={PAGES.SCROLL_GEAR}>
+        <Button>Scroll Gear</Button>
+      </a>
     </main>
   );
 }
