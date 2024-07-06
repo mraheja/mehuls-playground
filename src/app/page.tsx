@@ -10,6 +10,9 @@ export default function Home() {
       <a href={PAGES.SCROLL_GEAR}>
         <Button>Scroll Gear</Button>
       </a>
+      <a href={PAGES.INFINITE_GIRAFFE}>
+        <Button>Infinite Giraffe</Button>
+      </a>
     </main>
   );
 }
