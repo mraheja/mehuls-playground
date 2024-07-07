@@ -1,7 +1,5 @@
 import { Button } from "@/components/ui/button";
 import { PAGES } from "../constant/pages";
-import { Logo } from "@/components/atoms/Logo/Logo";
-import { Sprout } from "@/components/atoms/Sprout/Sprout";
 
 export default function Home() {
   return (
