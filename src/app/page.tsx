@@ -1,5 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { PAGES } from "../constant/pages";
+import { Logo } from "@/components/atoms/Logo/Logo";
+import { Sprout } from "@/components/atoms/Sprout/Sprout";
 
 export default function Home() {
   return (
@@ -12,6 +14,9 @@ export default function Home() {
       </a>
       <a href={PAGES.INFINITE_GIRAFFE}>
         <Button>Infinite Giraffe</Button>
+      </a>
+      <a href={PAGES.SWAYING_SPROUT}>
+        <Button>Swaying Sprout</Button>
       </a>
     </main>
   );

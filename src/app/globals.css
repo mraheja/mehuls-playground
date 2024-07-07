@@ -74,3 +74,23 @@
     @apply bg-background text-foreground;
   }
 }
+
+.sway-fast {
+  animation: sway 5s infinite;
+  transform-origin: 50% 100% 0;
+}
+
+.sway-slow {
+  animation: sway 10s infinite;
+  transform-origin: 50% 100% 0;
+}
+
+@keyframes sway {
+  0%,
+  100% {
+    transform: rotate(-6deg);
+  }
+  50% {
+    transform: rotate(6deg);
+  }
+}
