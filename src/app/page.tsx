@@ -16,6 +16,9 @@ export default function Home() {
       <a href={PAGES.SWAYING_SPROUT}>
         <Button>Swaying Sprout</Button>
       </a>
+      <a href={PAGES.PINKY_PROMISE}>
+        <Button>Pinky Promise</Button>
+      </a>
     </main>
   );
 }

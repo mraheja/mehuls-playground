@@ -4,4 +4,5 @@ export const PAGES = {
   SCROLL_GEAR: "/scroll-gear",
   INFINITE_GIRAFFE: "/infinite-giraffe",
   SWAYING_SPROUT: "/swaying-sprout",
+  PINKY_PROMISE: "/pinky-promise",
 };
