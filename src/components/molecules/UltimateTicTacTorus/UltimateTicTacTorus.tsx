@@ -24,7 +24,7 @@ export const UltimateTicTacTorus: React.FC<UltimateTicTacTorusProps> = ({
       {Array(9)
         .fill(null)
         .map((_, index) => (
-          <div className="border-2 border-black p-1" key={index}>
+          <div className="border-2 border-gray-600 p-1 rounded-sm" key={index}>
             <TicTacToe />
           </div>
         ))}
