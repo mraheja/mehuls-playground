@@ -4,7 +4,21 @@ import { TicTacToe } from "../TicTacToe/TicTacToe";
 import { useState, useEffect } from "react";
 import { UltimateTicTacToeProvider, useUltimateTicTacToe } from "@/contexts/UltimateTicTacToeContext";
 
-const BoardContainer = ({ index, children }: { index: number, children: React.ReactNode }) => {
+// Function to calculate relative board movement with torus wrapping
+const getRelativeBoard = (currentBoardIndex: number, position: number): number => {
+  const currentRow = Math.floor(currentBoardIndex / 3);
+  const currentCol = currentBoardIndex % 3;
+  const moveRow = Math.floor(position / 3);
+  const moveCol = position % 3;
+
+  // Calculate relative movement with wrapping
+  const newRow = (currentRow + moveRow - 1 + 3) % 3;
+  const newCol = (currentCol + moveCol - 1 + 3) % 3;
+
+  return newRow * 3 + newCol;
+};
+
+const BoardContainer = ({ index, children, showDottedBorder }: { index: number, children: React.ReactNode, showDottedBorder?: boolean }) => {
   const { currentBoard } = useUltimateTicTacToe();
   const isActive = currentBoard === null || currentBoard === index;
 
@@ -21,18 +35,19 @@ const BoardContainer = ({ index, children }: { index: number, children: React.Re
   ];
 
   return (
-    <div className={`border-2 p-1 rounded-sm transition-colors duration-200 ${colors[index]} ${
+    <div className={`border-2 p-1 rounded-sm transition-all duration-200 ${colors[index]} ${
       isActive ? "border-gray-600" : "border-gray-300"
-    }`}>
+    } ${showDottedBorder ? "!border-dotted !border-gray-600 !opacity-100" : ""}`}>
       {children}
     </div>
   );
 };
 
 const GameBoard = () => {
-  const { currentTurn } = useUltimateTicTacToe();
+  const { currentTurn, gameState, boardWinners } = useUltimateTicTacToe();
   const [visibleBoards, setVisibleBoards] = useState(-1);
   const [showTurnIndicator, setShowTurnIndicator] = useState(false);
+  const [hoveredMove, setHoveredMove] = useState<{board: number, position: number} | null>(null);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -49,13 +64,51 @@ const GameBoard = () => {
     }
   }, [visibleBoards]);
 
+  const handleSquareHover = (boardIndex: number, position: number | null) => {
+    if (position === null) {
+      setHoveredMove(null);
+    } else {
+      setHoveredMove({ board: boardIndex, position });
+    }
+  };
+
+  const getNextBoard = () => {
+    if (!hoveredMove) return null;
+    
+    // If position is center (4), stay in the same board
+    if (hoveredMove.position === 4) {
+      // If current board is won or full, allow playing anywhere
+      const isCurrentBoardWon = boardWinners[hoveredMove.board] !== null;
+      const isCurrentBoardFull = !gameState[hoveredMove.board].includes(null);
+      return isCurrentBoardWon || isCurrentBoardFull ? null : hoveredMove.board;
+    }
+    
+    const nextBoard = getRelativeBoard(hoveredMove.board, hoveredMove.position);
+    
+    // If target board is won or full, allow playing anywhere
+    const isTargetBoardWon = boardWinners[nextBoard] !== null;
+    const isTargetBoardFull = !gameState[nextBoard].includes(null);
+    
+    return isTargetBoardWon || isTargetBoardFull ? null : nextBoard;
+  };
+
+  const nextBoard = getNextBoard();
+  const showAllDotted = hoveredMove && nextBoard === null;
+
   const board = (
     <div className="grid grid-cols-3 gap-3 w-[500px] place-items-center">
       {Array(9)
         .fill(null)
         .map((_, index) => (
-          <BoardContainer key={index} index={index}>
-            <TicTacToe boardIndex={index} />
+          <BoardContainer 
+            key={index} 
+            index={index}
+            showDottedBorder={showAllDotted || nextBoard === index}
+          >
+            <TicTacToe 
+              boardIndex={index}
+              onHoverSquare={(position) => handleSquareHover(index, position)}
+            />
           </BoardContainer>
         ))}
     </div>
@@ -74,7 +127,9 @@ const GameBoard = () => {
 
   return (
     <div className="flex flex-col items-center gap-8">
-      <div className={`relative p-2 rounded-xl shadow-sm transition-colors duration-500 ${visibleBoards >= 8 ? "bg-white" : ""}`}>
+      <div className={`relative p-2 rounded-xl shadow-sm transition-all duration-500 ${visibleBoards >= 8 ? "bg-white" : ""} ${
+        showAllDotted ? "!border-2 !border-dotted !border-gray-600 !opacity-100" : ""
+      }`}>
         <div className={`transition-opacity duration-500 ${visibleBoards === 8 ? "opacity-100" : visibleBoards >= 0 ? "opacity-30" : "opacity-0"}`}>
           {board}
         </div>
