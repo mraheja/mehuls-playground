@@ -4,7 +4,7 @@ export interface TicTacToeProps {
 
 export const TicTacToe = () => {
     return (
-        <div className="grid grid-cols-3 gap-1">
+        <div className="grid grid-cols-3 gap-1 w-[150px] place-items-center">
             {Array(9).fill(null).map((_, index) => (
                 <div
                     key={index}

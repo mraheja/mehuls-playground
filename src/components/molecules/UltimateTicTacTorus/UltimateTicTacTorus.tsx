@@ -8,7 +8,7 @@ export const UltimateTicTacTorus: React.FC<UltimateTicTacTorusProps> = ({
   className,
 }) => {
   return (
-    <div className="grid grid-cols-3 gap-3">
+    <div className="grid grid-cols-3 gap-3 w-[500px] place-items-center">
       {Array(9).fill(null).map((_, index) => (
         <div className="border-2 border-black p-1" key={index}>
             <TicTacToe/>
