@@ -15,33 +15,40 @@ export const TicTacToe: React.FC<TicTacToeProps> = ({
     const isActive = currentBoard === null || currentBoard === boardIndex;
     const boardWinner = boardWinners[boardIndex];
 
-    if (boardWinner) {
-        return (
-            <div className="w-[150px] h-[150px] flex items-center justify-center">
-                <span className="text-6xl font-bold text-indigo-600">{boardWinner}</span>
-            </div>
-        );
-    }
-
-    return (
+    const boardContent = (
         <div 
             className={`grid grid-cols-3 gap-1 ${className} ${
-                isActive ? "opacity-100" : "opacity-50"
+                isActive && !boardWinner ? "opacity-100" : "opacity-50"
             }`}
         >
             {Array(9).fill(null).map((_, index) => (
                 <div
                     key={index}
                     className={`h-12 w-12 border-2 ${
-                        isActive ? "border-gray-600" : "border-gray-300"
+                        isActive && !boardWinner ? "border-gray-600" : "border-gray-300"
                     } flex items-center justify-center text-4xl cursor-pointer rounded-md ${
-                        isActive && !gameState[boardIndex][index] ? "hover:bg-gray-100" : ""
+                        isActive && !gameState[boardIndex][index] && !boardWinner ? "hover:bg-gray-100" : ""
                     }`}
-                    onClick={() => isActive && onPlay(boardIndex, index)}
+                    onClick={() => isActive && !boardWinner && onPlay(boardIndex, index)}
                 >
                     {gameState[boardIndex][index]}
                 </div>
             ))}
         </div>
     );
+
+    if (boardWinner) {
+        return (
+            <div className="relative w-[150px] h-[150px]">
+                <div className="absolute inset-0 opacity-30">
+                    {boardContent}
+                </div>
+                <div className="absolute inset-0 flex items-center justify-center">
+                    <span className="text-8xl font-bold text-indigo-600">{boardWinner}</span>
+                </div>
+            </div>
+        );
+    }
+
+    return boardContent;
 };
