@@ -57,8 +57,8 @@ export const TicTacToe: React.FC<TicTacToeProps> = ({
             key={index}
             className={`h-8 w-8 sm:h-12 sm:w-12 border-2 transform transition-all duration-300 ease-in-out ${
               (isActive && !boardWinner && !gameWinner) ? colors[boardIndex].border : colors[boardIndex].inactiveBorder
-            } flex items-center justify-center text-4xl ${
-              canPlay ? "cursor-pointer scale-100 hover:scale-105" : "cursor-default"
+            } flex items-center justify-center text-2xl sm:text-4xl ${
+              canPlay ? "cursor-pointer sm:hover:scale-105" : "cursor-default"
             } ${
               canPlay ? colors[boardIndex].bg : ""
             } rounded-md`}
@@ -82,7 +82,7 @@ export const TicTacToe: React.FC<TicTacToeProps> = ({
       {boardContent}
       {boardWinner && (
         <div className="absolute inset-0 flex items-center justify-center">
-          <span className={`text-8xl font-bold transform transition-transform duration-300 ease-in-out ${
+          <span className={`text-5xl sm:text-8xl font-bold transform transition-transform duration-300 ease-in-out ${
             boardWinner === 'X' ? 'text-violet-600' : 'text-sky-600'
           }`}>
             {boardWinner}

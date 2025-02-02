@@ -40,7 +40,7 @@ const BoardContainer = ({ index, children, showDottedBorder }: { index: number, 
 
   return (
     <div className={`p-1 rounded-sm transform transition-all duration-300 ease-in-out ${colors[index]} 
-    ${showDottedBorder ? "ring-opacity-100 scale-[1.02]" : "ring-opacity-0 scale-100"} ${isActive ? "scale-[1.02]" : "scale-100"}`}>
+    ${showDottedBorder ? "ring-opacity-100 sm:scale-[1.02]" : "ring-opacity-0"} ${isActive ? "sm:scale-[1.02]" : ""}`}>
       {children}
     </div>
   );
@@ -155,7 +155,7 @@ const GameBoard = () => {
   };
 
   const board = (
-    <div className="grid grid-cols-3 gap-3 w-[350px] sm:w-[500px] place-items-center">
+    <div className="grid grid-cols-3 gap-1 sm:gap-3 w-[350px] sm:w-[500px] place-items-center">
       {Array(9)
         .fill(null)
         .map((_, index) => (
@@ -186,9 +186,9 @@ const GameBoard = () => {
   ];
 
   return (
-    <div className="flex flex-col items-center gap-8">
+    <div className="flex flex-col items-center gap-4 sm:gap-8">
       <div className="relative">
-        <div className={`sm:w-full w-[370px] relative p-2 rounded-xl transition-all duration-500 ${showTurnIndicator ? "bg-white shadow-sm " : ""}`}>
+        <div className={`sm:w-full w-[370px] relative p-1 sm:p-2 rounded-xl transition-all duration-500 ${showTurnIndicator ? "bg-white shadow-sm" : ""}`}>
           <div className={`transition-opacity duration-500 ${showTurnIndicator ? "opacity-100" : visibleBoards >= 0 ? "opacity-30" : "opacity-0"}`}>
             {board}
           </div>
@@ -205,13 +205,15 @@ const GameBoard = () => {
         </div>
       </div>
       <div className="relative">
-        <div className={`text-2xl font-bold bg-white px-6 py-3 rounded-xl shadow-sm z-10 relative transition-all duration-500 transform ${
-          showTurnIndicator ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+        <div className={`text-xl text-center sm:text-2xl font-bold bg-white px-4 sm:px-6 py-2 sm:py-3 rounded-xl shadow-sm z-10 relative transition-opacity duration-500 ${
+          showTurnIndicator ? "opacity-100" : "opacity-0"
         }`}>
           {gameWinner 
             ? `Player ${gameWinner} wins!`
             : gameState.every(board => board.every(cell => cell === null))
-              ? "Welcome to Ultimate Tic-Tac-Torus!"
+              ? <span>
+                  <span className="hidden sm:inline">Welcome to </span>Ultimate Tic-Tac-Torus!
+                </span>
               : <div className={`${
                 currentTurn === 'X' ? 'text-violet-600' : 'text-sky-600'
               }`}>
@@ -219,57 +221,68 @@ const GameBoard = () => {
               </div>
           }
         </div>
-        {canUndo && (
-          <div className={`absolute left-1/2 -translate-x-1/2 -bottom-7 flex gap-2 ${showTurnIndicator ? "opacity-100" : "opacity-0"}`}>
-            <Tooltip.Root>
-              <Tooltip.Trigger asChild>
-                <button
-                  onClick={onUndo}
-                  className="text-xs font-medium px-3 py-1 rounded-b-lg transition-all duration-200 
-                    bg-gray-400 text-gray-700 hover:bg-gray-700 shadow-sm -translate-y-2"
-                >
-                  <UndoIcon className="h-3 w-3 stroke-white" />
-                </button>
-              </Tooltip.Trigger>
-              <Tooltip.Portal>
-                <Tooltip.Content
-                  className="z-50 select-none rounded-lg bg-white px-3 py-2 text-sm leading-none shadow-md animate-in fade-in-0 zoom-in-95"
-                  sideOffset={10}
-                  side="bottom"
-                >
-                  Undo last move
-                  <Tooltip.Arrow className="fill-white" />
-                </Tooltip.Content>
-              </Tooltip.Portal>
-            </Tooltip.Root>
-
-            <Tooltip.Root>
-              <Tooltip.Trigger asChild>
-                <button
-                  onClick={handleShare}
-                  className="text-xs font-medium px-3 py-1 rounded-b-lg transition-all duration-200 
-                    bg-gray-400 text-gray-700 hover:bg-gray-700 shadow-sm -translate-y-2"
-                >
+        <div className={`sm:absolute relative mt-6 sm:mt-0 left-1/2 -translate-x-1/2 sm:-bottom-7 flex gap-3 w-full sm:w-auto justify-center transition-opacity duration-500 ${showTurnIndicator ? "opacity-100" : "opacity-0"}`}>
+          <Tooltip.Root>
+            <Tooltip.Trigger asChild>
+              <button
+                onClick={onUndo}
+                disabled={!canUndo}
+                className={`sm:text-xs text-base font-medium sm:px-4 px-6 sm:py-2 py-3 rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg
+                  ${canUndo 
+                    ? "bg-violet-50 hover:bg-violet-100 text-violet-700" 
+                    : "bg-gray-50 text-gray-400 cursor-not-allowed"
+                  } flex-1 sm:flex-none`}
+              >
+                <span className="hidden sm:block">
+                  <UndoIcon className={`h-4 w-4 ${canUndo ? "stroke-violet-700" : "stroke-gray-400"}`} />
+                </span>
+                <span className="sm:hidden">Undo</span>
+              </button>
+            </Tooltip.Trigger>
+            <Tooltip.Portal>
+              <Tooltip.Content
+                className="bg-white px-3 py-1.5 rounded-lg shadow-md text-sm z-50"
+                sideOffset={5}
+                side="bottom"
+                align="center"
+              >
+                Undo last move
+                <Tooltip.Arrow className="fill-white" />
+              </Tooltip.Content>
+            </Tooltip.Portal>
+          </Tooltip.Root>
+          <Tooltip.Root>
+            <Tooltip.Trigger asChild>
+              <button
+                onClick={handleShare}
+                className="sm:text-xs text-base font-medium sm:px-4 px-6 sm:py-2 py-3 rounded-lg transition-colors duration-200 
+                  bg-sky-50 hover:bg-sky-100 text-sky-700 shadow-md hover:shadow-lg flex-1 sm:flex-none"
+              >
+                <span className="hidden sm:block">
                   {showShareSuccess ? (
-                    <CheckIcon className="h-3 w-3 stroke-white" />
+                    <CheckIcon className="h-4 w-4 stroke-sky-700" />
                   ) : (
-                    <Share2Icon className="h-3 w-3 stroke-white" />
+                    <Share2Icon className="h-4 w-4 stroke-sky-700" />
                   )}
-                </button>
-              </Tooltip.Trigger>
-              <Tooltip.Portal>
-                <Tooltip.Content
-                  className="z-50 select-none rounded-lg bg-white px-3 py-2 text-sm leading-none shadow-md animate-in fade-in-0 zoom-in-95"
-                  sideOffset={10}
-                  side="bottom"
-                >
-                  {showShareSuccess ? "Copied!" : "Share game state"}
-                  <Tooltip.Arrow className="fill-white" />
-                </Tooltip.Content>
-              </Tooltip.Portal>
-            </Tooltip.Root>
-          </div>
-        )}
+                </span>
+                <span className="sm:hidden">
+                  {showShareSuccess ? "Copied!" : "Share"}
+                </span>
+              </button>
+            </Tooltip.Trigger>
+            <Tooltip.Portal>
+              <Tooltip.Content
+                className="bg-white px-3 py-1.5 rounded-lg shadow-md text-sm z-50"
+                sideOffset={5}
+                side="bottom"
+                align="center"
+              >
+                {showShareSuccess ? "Copied!" : "Share game state"}
+                <Tooltip.Arrow className="fill-white" />
+              </Tooltip.Content>
+            </Tooltip.Portal>
+          </Tooltip.Root>
+        </div>
       </div>
     </div>
   );
