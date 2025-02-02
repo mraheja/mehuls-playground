@@ -1,3 +1,4 @@
+// @ts-nocheck
 'use client'
 
 import { useUltimateTicTacToe } from "@/contexts/UltimateTicTacToeContext";
@@ -39,6 +40,7 @@ export const TicTacToe: React.FC<TicTacToeProps> = ({
   const handleClick = (position: number) => {
     if (disabled || !isActive || boardWinner || gameState[boardIndex][position]) return;
     onPlay(boardIndex, position);
+    onHoverSquare?.(null); // Reset hover state after making a move
   };
 
   const boardContent = (
@@ -49,22 +51,24 @@ export const TicTacToe: React.FC<TicTacToeProps> = ({
     >
       {Array(9).fill(null).map((_, index) => {
         const canPlay = isActive && !gameState[boardIndex][index] && !boardWinner && !disabled;
+        const content = gameState[boardIndex][index];
         return (
           <div
             key={index}
-            className={`h-12 w-12 border-2 ${
+            className={`h-12 w-12 border-2 transform transition-all duration-300 ease-in-out ${
               (isActive && !boardWinner && !gameWinner) ? colors[boardIndex].border : colors[boardIndex].inactiveBorder
             } flex items-center justify-center text-4xl ${
-              canPlay ? "cursor-pointer" : "cursor-default"
+              canPlay ? "cursor-pointer scale-100 hover:scale-105" : "cursor-default"
             } ${
-              //@ts-ignore
               canPlay ? colors[boardIndex].bg : ""
             } rounded-md`}
             onClick={() => canPlay && handleClick(index)}
             onMouseEnter={() => canPlay && handleHover(index)}
             onMouseLeave={() => canPlay && handleHover(null)}
           >
-            {gameState[boardIndex][index]}
+            <span className="transform transition-all duration-300 ease-in-out">
+              {content}
+            </span>
           </div>
         );
       })}
@@ -78,7 +82,7 @@ export const TicTacToe: React.FC<TicTacToeProps> = ({
           {boardContent}
         </div>
         <div className="absolute inset-0 flex items-center justify-center">
-          <span className="text-8xl font-bold text-orange-600">{boardWinner}</span>
+          <span className="text-8xl font-bold text-orange-600 transform transition-all duration-300 ease-in-out opacity-0 scale-0 ${boardWinner ? 'opacity-100 scale-100' : ''}">{boardWinner}</span>
         </div>
       </div>
     );

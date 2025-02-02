@@ -39,8 +39,8 @@ const BoardContainer = ({ index, children, showDottedBorder }: { index: number, 
   ];
 
   return (
-    <div className={`p-1 rounded-sm transition-all duration-200 ${colors[index]} 
-    ${showDottedBorder ? "!ring-gray-300 ring-[1px]" : ""}`}>
+    <div className={`p-1 rounded-sm transform transition-all duration-300 ease-in-out ${colors[index]} 
+    ${showDottedBorder ? "!ring-gray-300 ring-[1px] ring-opacity-100 scale-[1.02]" : "ring-opacity-0 scale-100"} ${isActive ? "scale-[1.02]" : "scale-100"}`}>
       {children}
     </div>
   );
