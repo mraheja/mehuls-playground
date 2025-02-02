@@ -10,7 +10,7 @@ export interface UltimateTicTacTorusProps {
 export const UltimateTicTacTorus: React.FC<UltimateTicTacTorusProps> = ({
   className,
 }) => {
-  const [visibleBoards, setVisibleBoards] = useState(0);
+  const [visibleBoards, setVisibleBoards] = useState(-1);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -44,7 +44,9 @@ export const UltimateTicTacTorus: React.FC<UltimateTicTacTorusProps> = ({
 
   return (
     <div className="relative">
-      {board}
+      <div className={`transition-opacity duration-500 ${visibleBoards >= 0 ? "opacity-100" : "opacity-0"}`}>
+        {board}
+      </div>
       {absoluteBoards.map((position, index) => (
         <div
           key={index}
