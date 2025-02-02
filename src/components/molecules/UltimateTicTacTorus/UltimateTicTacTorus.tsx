@@ -97,7 +97,7 @@ const GameBoard = () => {
 
   useEffect(() => {
     if (showShareSuccess) {
-      const timer = setTimeout(() => setShowShareSuccess(false), 1000);
+      const timer = setTimeout(() => setShowShareSuccess(false), 3000);
       return () => clearTimeout(timer);
     }
   }, [showShareSuccess]);
@@ -277,7 +277,7 @@ const GameBoard = () => {
                 side="bottom"
                 align="center"
               >
-                {showShareSuccess ? "Copied!" : "Share game state"}
+                {showShareSuccess ? "Copied!" : "Copy link to share"}
                 <Tooltip.Arrow className="fill-white" />
               </Tooltip.Content>
             </Tooltip.Portal>
