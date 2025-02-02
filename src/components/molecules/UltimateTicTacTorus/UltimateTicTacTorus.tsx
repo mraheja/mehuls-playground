@@ -35,15 +35,15 @@ const BoardContainer = ({ index, children, showDottedBorder }: { index: number, 
   ];
 
   return (
-    <div className={`border-2 p-1 rounded-sm transition-all duration-200 border-gray-600 ${colors[index]} 
-    ${showDottedBorder ? "!border-dotted" : ""}`}>
+    <div className={`p-1 rounded-sm transition-all duration-200 ${colors[index]} 
+    ${showDottedBorder ? "!ring-gray-300 ring-[1px]" : ""}`}>
       {children}
     </div>
   );
 };
 
 const GameBoard = () => {
-  const { currentTurn, gameState, boardWinners } = useUltimateTicTacToe();
+  const { currentTurn, gameState, boardWinners, gameWinner } = useUltimateTicTacToe();
   const [visibleBoards, setVisibleBoards] = useState(-1);
   const [showTurnIndicator, setShowTurnIndicator] = useState(false);
   const [hoveredMove, setHoveredMove] = useState<{board: number, position: number} | null>(null);
@@ -137,10 +137,8 @@ const GameBoard = () => {
 
   return (
     <div className="flex flex-col items-center gap-8">
-      <div className={`relative p-2 rounded-xl shadow-sm transition-all duration-500 ${visibleBoards >= 8 ? "bg-white" : ""} ${
-        showAllDotted ? "!border-2 !border-dotted !border-gray-600 !opacity-100" : ""
-      }`}>
-        <div className={`transition-opacity duration-500 ${visibleBoards === 8 ? "opacity-100" : visibleBoards >= 0 ? "opacity-30" : "opacity-0"}`}>
+      <div className={`relative p-2 rounded-xl shadow-sm transition-all duration-500 ${showTurnIndicator ? "bg-white" : ""}`}>
+        <div className={`transition-opacity duration-500 ${showTurnIndicator ? "opacity-100" : visibleBoards >= 0 ? "opacity-30" : "opacity-0"}`}>
           {board}
         </div>
         {absoluteBoards.map((position, index) => (
@@ -157,7 +155,11 @@ const GameBoard = () => {
       <div className={`text-2xl font-bold bg-white px-6 py-3 rounded-xl shadow-sm z-10 relative transition-all duration-500 transform ${
         showTurnIndicator ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
       }`}>
-        Player {currentTurn}'s Turn
+        {gameWinner 
+          ? `Player ${gameWinner} wins!`
+          : gameState.every(board => board.every(cell => cell === null))
+            ? "Welcome to Ultimate Tic-Tac-Torus!"
+            : `Player ${currentTurn}'s Turn`}
       </div>
     </div>
   );
