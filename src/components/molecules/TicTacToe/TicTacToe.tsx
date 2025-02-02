@@ -57,6 +57,7 @@ export const TicTacToe: React.FC<TicTacToeProps> = ({
             } flex items-center justify-center text-4xl ${
               canPlay ? "cursor-pointer" : "cursor-default"
             } ${
+              //@ts-ignore
               canPlay ? colors[boardIndex].bg : ""
             } rounded-md`}
             onClick={() => canPlay && handleClick(index)}
