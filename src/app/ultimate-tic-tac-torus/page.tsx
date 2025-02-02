@@ -2,7 +2,7 @@ import { UltimateTicTacTorus } from "@/components/molecules/UltimateTicTacTorus/
 
 const UltimateTicTacTorusPage = () => {
   return (
-    <div className="flex justify-center items-center min-h-[100dvh]">
+    <div className="flex justify-center items-center min-h-[100dvh] overflow-clip">
       <UltimateTicTacTorus />
     </div>
   );
