@@ -10,6 +10,8 @@ interface UltimateTicTacToeContextType {
   gameState: GameState;
   currentTurn: Player;
   onPlay: (boardIndex: number, position: number) => void;
+  onUndo: () => void;
+  canUndo: boolean;
   currentBoard: number | null;
   winner: Player | null;
   boardWinners: (Player | null)[];
@@ -72,10 +74,20 @@ const checkWinner = (board: (Player | null)[]) => {
   return null;
 };
 
+const initialGameState: GameState = {
+  gameState: Array(9).fill(null).map(() => Array(9).fill(null)),
+  currentBoard: null,
+  currentTurn: 'X',
+  boardWinners: Array(9).fill(null),
+  gameWinner: null,
+};
+
 export const UltimateTicTacToeContext = createContext<UltimateTicTacToeContextType>({
-  gameState: Array(9).fill(Array(9).fill(null)),
+  gameState: Array(9).fill(null).map(() => Array(9).fill(null)),
   currentTurn: "X",
   onPlay: () => {},
+  onUndo: () => {},
+  canUndo: false,
   currentBoard: null,
   winner: null,
   boardWinners: Array(9).fill(null),
@@ -89,13 +101,18 @@ interface UltimateTicTacToeProviderProps {
 }
 
 export const UltimateTicTacToeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [gameState, setGameState] = useState<GameState>(
-    Array(9).fill(null).map(() => Array(9).fill(null))
-  );
-  const [currentBoard, setCurrentBoard] = useState<number | null>(null);
-  const [currentTurn, setCurrentTurn] = useState<Player>("X");
-  const [boardWinners, setBoardWinners] = useState<(Player | null)[]>(Array(9).fill(null));
-  const [gameWinner, setGameWinner] = useState<Player | null>(null);
+  const [history, setHistory] = useState<GameState[]>([initialGameState]);
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  // Current state is always the last state in our valid history
+  const currentState = history[currentIndex];
+  const { gameState, currentBoard, currentTurn, boardWinners, gameWinner } = currentState;
+
+  const onUndo = useCallback(() => {
+    if (currentIndex > 0) {
+      setCurrentIndex(currentIndex - 1);
+    }
+  }, [currentIndex]);
 
   const onPlay = useCallback((boardIndex: number, position: number) => {
     if (gameWinner) return;
@@ -111,41 +128,39 @@ export const UltimateTicTacToeProvider: React.FC<{ children: React.ReactNode }> 
     const newGameState = [...gameState];
     newGameState[boardIndex] = [...gameState[boardIndex]];
     newGameState[boardIndex][position] = currentTurn;
-    setGameState(newGameState);
 
     const winner = checkWinner(newGameState[boardIndex]);
+    const newBoardWinners = [...boardWinners];
     if (winner) {
-      const newBoardWinners = [...boardWinners];
       newBoardWinners[boardIndex] = winner;
-      setBoardWinners(newBoardWinners);
-
-      // Check if this creates a game winner
-      const overallWinner = checkWinner(newBoardWinners);
-      if (overallWinner) {
-        setGameWinner(overallWinner);
-        return;
-      }
     }
 
     // Calculate next board using toroidal movement
     const nextBoard = getRelativePosition(boardIndex, position);
 
     // If target board is won or full, allow playing anywhere
-    const isTargetBoardWon = boardWinners[nextBoard] !== null;
-    const isTargetBoardFull = !gameState[nextBoard].includes(null);
+    const isTargetBoardWon = newBoardWinners[nextBoard] !== null;
+    const isTargetBoardFull = !newGameState[nextBoard].includes(null);
     
-    setCurrentBoard(isTargetBoardWon || isTargetBoardFull ? null : nextBoard);
-    setCurrentTurn(currentTurn === 'X' ? 'O' : 'X');
-  }, [currentBoard, currentTurn, gameState, boardWinners, gameWinner]);
+    const newState: GameState = {
+      gameState: newGameState,
+      currentBoard: isTargetBoardWon || isTargetBoardFull ? null : nextBoard,
+      currentTurn: currentTurn === 'X' ? 'O' : 'X',
+      boardWinners: newBoardWinners,
+      gameWinner: winner ? checkWinner(newBoardWinners) : null,
+    };
+
+    // Add new state to history, removing any future states if we had undone
+    setHistory(history.slice(0, currentIndex + 1).concat([newState]));
+    setCurrentIndex(currentIndex + 1);
+  }, [currentBoard, currentTurn, gameState, boardWinners, gameWinner, history, currentIndex]);
 
   return (
     <UltimateTicTacToeContext.Provider value={{
-      gameState,
-      currentBoard,
-      currentTurn,
-      boardWinners,
-      gameWinner,
+      ...currentState,
       onPlay,
+      onUndo,
+      canUndo: currentIndex > 0,
     }}>
       {children}
     </UltimateTicTacToeContext.Provider>

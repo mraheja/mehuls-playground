@@ -27,9 +27,9 @@ export const TicTacToe: React.FC<TicTacToeProps> = ({
   onHoverSquare,
   disabled
 }) => {
-  const { gameState, currentTurn, onPlay, currentBoard, boardWinners } = useUltimateTicTacToe();
-  const isActive = currentBoard === null || currentBoard === boardIndex;
+  const { gameState, currentTurn, onPlay, currentBoard, boardWinners, gameWinner } = useUltimateTicTacToe();
   const boardWinner = boardWinners[boardIndex];
+  const isActive = (currentBoard === null || currentBoard === boardIndex) && !boardWinner;
 
   const handleHover = (position: number | null) => {
     if (disabled || !isActive || boardWinner || (position !== null && gameState[boardIndex][position])) return;
@@ -47,21 +47,26 @@ export const TicTacToe: React.FC<TicTacToeProps> = ({
         !boardWinner ? "opacity-100" : "opacity-50"
       }`}
     >
-      {Array(9).fill(null).map((_, index) => (
-        <div
-          key={index}
-          className={`h-12 w-12 border-2 ${
-            isActive && !boardWinner ? "border-gray-600" : "border-gray-300"
-          } flex items-center justify-center text-4xl cursor-pointer rounded-md ${
-            !gameState[boardIndex][index] && !boardWinner && !disabled ? colors[boardIndex].bg : ""
-          }`}
-          onClick={() => handleClick(index)}
-          onMouseEnter={() => handleHover(index)}
-          onMouseLeave={() => handleHover(null)}
-        >
-          {gameState[boardIndex][index]}
-        </div>
-      ))}
+      {Array(9).fill(null).map((_, index) => {
+        const canPlay = isActive && !gameState[boardIndex][index] && !boardWinner && !disabled;
+        return (
+          <div
+            key={index}
+            className={`h-12 w-12 border-2 ${
+              isActive && !boardWinner && !gameWinner ? "border-gray-600" : "border-gray-300"
+            } flex items-center justify-center text-4xl ${
+              canPlay ? "cursor-pointer" : "cursor-default"
+            } ${
+              canPlay ? colors[boardIndex].bg : ""
+            } rounded-md`}
+            onClick={() => canPlay && handleClick(index)}
+            onMouseEnter={() => canPlay && handleHover(index)}
+            onMouseLeave={() => canPlay && handleHover(null)}
+          >
+            {gameState[boardIndex][index]}
+          </div>
+        );
+      })}
     </div>
   );
 

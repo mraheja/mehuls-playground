@@ -3,6 +3,7 @@
 import { TicTacToe } from "../TicTacToe/TicTacToe";
 import { useState, useEffect } from "react";
 import { UltimateTicTacToeProvider, useUltimateTicTacToe } from "@/contexts/UltimateTicTacToeContext";
+import { UndoIcon } from "lucide-react";
 
 // Function to calculate relative board movement with torus wrapping
 const getRelativeBoard = (currentBoardIndex: number, position: number): number => {
@@ -43,7 +44,7 @@ const BoardContainer = ({ index, children, showDottedBorder }: { index: number, 
 };
 
 const GameBoard = () => {
-  const { currentTurn, gameState, boardWinners, gameWinner } = useUltimateTicTacToe();
+  const { currentTurn, gameState, boardWinners, gameWinner, onUndo, canUndo } = useUltimateTicTacToe();
   const [visibleBoards, setVisibleBoards] = useState(-1);
   const [showTurnIndicator, setShowTurnIndicator] = useState(false);
   const [hoveredMove, setHoveredMove] = useState<{board: number, position: number} | null>(null);
@@ -137,29 +138,44 @@ const GameBoard = () => {
 
   return (
     <div className="flex flex-col items-center gap-8">
-      <div className={`relative p-2 rounded-xl shadow-sm transition-all duration-500 ${showTurnIndicator ? "bg-white" : ""}`}>
-        <div className={`transition-opacity duration-500 ${showTurnIndicator ? "opacity-100" : visibleBoards >= 0 ? "opacity-30" : "opacity-0"}`}>
-          {board}
-        </div>
-        {absoluteBoards.map((position, index) => (
-          <div
-            key={index}
-            className={`absolute ${position} transition-opacity duration-500 ${
-              index < visibleBoards ? "opacity-30" : "opacity-0"
-            }`}
-          >
+      <div className="relative w-full">
+        <div className={`relative p-2 rounded-xl shadow-sm transition-all duration-500 ${showTurnIndicator ? "bg-white" : ""}`}>
+          <div className={`transition-opacity duration-500 ${showTurnIndicator ? "opacity-100" : visibleBoards >= 0 ? "opacity-30" : "opacity-0"}`}>
             {board}
           </div>
-        ))}
+          {absoluteBoards.map((position, index) => (
+            <div
+              key={index}
+              className={`absolute ${position} transition-opacity duration-500 ${
+                index < visibleBoards ? "opacity-30" : "opacity-0"
+              }`}
+            >
+              {board}
+            </div>
+          ))}
+        </div>
       </div>
-      <div className={`text-2xl font-bold bg-white px-6 py-3 rounded-xl shadow-sm z-10 relative transition-all duration-500 transform ${
-        showTurnIndicator ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
-      }`}>
-        {gameWinner 
-          ? `Player ${gameWinner} wins!`
-          : gameState.every(board => board.every(cell => cell === null))
-            ? "Welcome to Ultimate Tic-Tac-Torus!"
-            : `Player ${currentTurn}'s Turn`}
+      <div className="relative">
+        <div className={`text-2xl font-bold bg-white px-6 py-3 rounded-xl shadow-sm z-10 relative transition-all duration-500 transform ${
+          showTurnIndicator ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+        }`}>
+          {gameWinner 
+            ? `Player ${gameWinner} wins!`
+            : gameState.every(board => board.every(cell => cell === null))
+              ? "Welcome to Ultimate Tic-Tac-Torus!"
+              : `Player ${currentTurn}'s Turn`}
+        </div>
+        {canUndo && (
+          <div className="absolute left-1/2 -translate-x-1/2 -bottom-7">
+            <button
+              onClick={onUndo}
+              className="text-xs font-medium px-3 py-1 rounded-b-lg transition-all duration-200 
+                bg-gray-400 text-gray-700 hover:bg-gray-700 shadow-sm -translate-y-2"
+            >
+              <UndoIcon className="h-3 w-3 stroke-white" />
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
