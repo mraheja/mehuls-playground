@@ -3,7 +3,8 @@
 import { TicTacToe } from "../TicTacToe/TicTacToe";
 import { useState, useEffect } from "react";
 import { UltimateTicTacToeProvider, useUltimateTicTacToe } from "@/contexts/UltimateTicTacToeContext";
-import { UndoIcon } from "lucide-react";
+import { UndoIcon, Share2Icon, CheckIcon } from "lucide-react";
+import { useSearchParams } from "next/navigation";
 
 // Function to calculate relative board movement with torus wrapping
 const getRelativeBoard = (currentBoardIndex: number, position: number): number => {
@@ -27,12 +28,12 @@ const BoardContainer = ({ index, children, showDottedBorder }: { index: number, 
     "bg-red-50",
     "bg-blue-50",
     "bg-green-50",
-    "bg-yellow-50",
+    "bg-teal-50",
     "bg-purple-50",
     "bg-pink-50",
     "bg-indigo-50",
     "bg-orange-50",
-    "bg-teal-50"
+    "bg-yellow-50"
   ];
 
   return (
@@ -44,34 +45,58 @@ const BoardContainer = ({ index, children, showDottedBorder }: { index: number, 
 };
 
 const GameBoard = () => {
-  const { currentTurn, gameState, boardWinners, gameWinner, onUndo, canUndo } = useUltimateTicTacToe();
+  const { currentTurn, gameState, boardWinners, gameWinner, onUndo, getStateUrl, canUndo } = useUltimateTicTacToe();
   const [visibleBoards, setVisibleBoards] = useState(-1);
   const [showTurnIndicator, setShowTurnIndicator] = useState(false);
   const [hoveredMove, setHoveredMove] = useState<{board: number, position: number} | null>(null);
+  const [showShareSuccess, setShowShareSuccess] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setVisibleBoards((prev) => {
-        if (prev === 7) {
-          clearInterval(timer);
-          setTimeout(() => {
-            setIsLoading(false);
-          }, 500); // Give a little extra time after the last board appears
-        }
-        return prev < 8 ? prev + 1 : prev;
-      });
-    }, 200);
-    return () => clearInterval(timer);
-  }, []);
+  // Check if we're loading from a URL state
+  const searchParams = useSearchParams();
+  const hasUrlState = searchParams.has('state');
 
   useEffect(() => {
-    if (visibleBoards === 8) {
-      setTimeout(() => {
-        setShowTurnIndicator(true);
-      }, 300); // Wait a bit after the last board appears
+    if (hasUrlState) {
+      // Skip animation if loading from URL
+      setVisibleBoards(8);
+      setShowTurnIndicator(true);
+      setIsLoading(false);
+    } else {
+      // Do the normal animation
+      const timer = setInterval(() => {
+        setVisibleBoards(prev => {
+          if (prev >= 8) {
+            clearInterval(timer);
+            return prev;
+          }
+          return prev + 1;
+        });
+      }, 100);
+
+      return () => clearInterval(timer);
     }
-  }, [visibleBoards]);
+  }, [hasUrlState]);
+
+  useEffect(() => {
+    if (!hasUrlState) {
+      // Only do this animation if not loading from URL
+      if (visibleBoards >= 8) {
+        const timer = setTimeout(() => {
+          setShowTurnIndicator(true);
+          setIsLoading(false);
+        }, 500);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [visibleBoards, hasUrlState]);
+
+  useEffect(() => {
+    if (showShareSuccess) {
+      const timer = setTimeout(() => setShowShareSuccess(false), 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [showShareSuccess]);
 
   const handleSquareHover = (boardIndex: number, position: number | null) => {
     if (isLoading) return;
@@ -104,6 +129,11 @@ const GameBoard = () => {
 
   const nextBoard = getNextBoard();
   const showAllDotted = hoveredMove && nextBoard === null;
+
+  const handleShare = () => {
+    navigator.clipboard.writeText(getStateUrl());
+    setShowShareSuccess(true);
+  };
 
   const board = (
     <div className="grid grid-cols-3 gap-3 w-[500px] place-items-center">
@@ -166,7 +196,7 @@ const GameBoard = () => {
               : `Player ${currentTurn}'s Turn`}
         </div>
         {canUndo && (
-          <div className="absolute left-1/2 -translate-x-1/2 -bottom-7">
+          <div className={`absolute left-1/2 -translate-x-1/2 -bottom-7 flex gap-2 ${showTurnIndicator ? "opacity-100" : "opacity-0"}`}>
             <button
               onClick={onUndo}
               className="text-xs font-medium px-3 py-1 rounded-b-lg transition-all duration-200 
@@ -174,7 +204,19 @@ const GameBoard = () => {
             >
               <UndoIcon className="h-3 w-3 stroke-white" />
             </button>
-          </div>
+    
+          <button
+            onClick={handleShare}
+            className="text-xs font-medium px-3 py-1 rounded-b-lg transition-all duration-200 
+              bg-gray-400 text-gray-700 hover:bg-gray-700 shadow-sm -translate-y-2"
+          >
+            {showShareSuccess ? (
+              <CheckIcon className="h-3 w-3 stroke-white" />
+            ) : (
+              <Share2Icon className="h-3 w-3 stroke-white" />
+            )}
+          </button>
+        </div>
         )}
       </div>
     </div>

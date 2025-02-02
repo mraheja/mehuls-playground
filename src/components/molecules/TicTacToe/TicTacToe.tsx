@@ -6,12 +6,12 @@ const colors = {
   0: { bg: "hover:bg-red-100" },
   1: { bg: "hover:bg-blue-100" },
   2: { bg: "hover:bg-green-100" },
-  3: { bg: "hover:bg-yellow-100" },
+  3: { bg: "hover:bg-teal-100" },
   4: { bg: "hover:bg-purple-100" },
   5: { bg: "hover:bg-pink-100" },
   6: { bg: "hover:bg-indigo-100" },
   7: { bg: "hover:bg-orange-100" },
-  8: { bg: "hover:bg-teal-100" }
+  8: { bg: "hover:bg-yellow-100" }
 };
 
 export interface TicTacToeProps {

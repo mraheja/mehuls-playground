@@ -1,22 +1,24 @@
 'use client'
 
-import { createContext, useContext, useState, useCallback, ReactNode } from "react";
+import { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 
-type Player = "X" | "O";
-type BoardState = (Player | null)[];
-type GameState = BoardState[];
+interface GameState {
+  gameState: (string | null)[][];
+  currentBoard: number | null;
+  currentTurn: string;
+  boardWinners: (string | null)[];
+  gameWinner: string | null;
+}
 
-interface UltimateTicTacToeContextType {
-  gameState: GameState;
-  currentTurn: Player;
+interface UltimateTicTacToeContextType extends GameState {
   onPlay: (boardIndex: number, position: number) => void;
   onUndo: () => void;
+  getStateUrl: () => string;
   canUndo: boolean;
-  currentBoard: number | null;
-  winner: Player | null;
-  boardWinners: (Player | null)[];
-  gameWinner: Player | null;
 }
+
+const UltimateTicTacToeContext = createContext<UltimateTicTacToeContextType | undefined>(undefined);
 
 // Function to calculate relative position with torus wrapping
 const getRelativePosition = (currentPos: number, movePos: number): number => {
@@ -47,7 +49,7 @@ const basicWinningCombinations = [
   [2, 4, 6],
 ];
 
-const checkWinner = (board: (Player | null)[]) => {
+const checkWinner = (board: (string | null)[]) => {
   // First check basic winning combinations
   for (const [a, b, c] of basicWinningCombinations) {
     if (board[a] && board[a] === board[b] && board[a] === board[c]) {
@@ -74,6 +76,66 @@ const checkWinner = (board: (Player | null)[]) => {
   return null;
 };
 
+// Encode game state to URL-friendly string
+const encodeGameState = (state: GameState): string => {
+  const { gameState, currentBoard } = state;
+  // First 81 chars are the board state
+  const boardState = gameState.map(board => 
+    board.map(cell => cell === null ? '-' : cell).join('')
+  ).join('');
+  // Add current board at the end (- for null)
+  return boardState + '_' + (currentBoard === null ? '-' : currentBoard);
+};
+
+// Decode URL string to game state
+const decodeGameState = (encoded: string): (string | null)[][] | null => {
+  const [boardState, currentBoard] = encoded.split('_');
+  if (!boardState || boardState.length !== 81) return null;
+  
+  const result: (string | null)[][] = [];
+  for (let i = 0; i < 9; i++) {
+    const board: (string | null)[] = [];
+    for (let j = 0; j < 9; j++) {
+      const cell = boardState[i * 9 + j];
+      board.push(cell === '-' ? null : cell);
+    }
+    result.push(board);
+  }
+  return result;
+};
+
+// Calculate all winners and next state from a game state
+const calculateGameState = (boards: (string | null)[][], currentBoard: number | null): {
+  boardWinners: (string | null)[],
+  gameWinner: string | null,
+  currentTurn: string,
+  currentBoard: number | null
+} => {
+  // Calculate board winners
+  const boardWinners = boards.map(board => checkWinner(board));
+  
+  // Calculate game winner
+  const gameWinner = checkWinner(boardWinners);
+  
+  // Calculate current turn
+  const moveCount = boards.flat().filter(cell => cell !== null).length;
+  const currentTurn = moveCount % 2 === 0 ? 'X' : 'O';
+
+  // Validate current board
+  const isValidBoard = currentBoard !== null && 
+    currentBoard >= 0 && 
+    currentBoard < 9 &&
+    !boardWinners[currentBoard] && 
+    boards[currentBoard].some(cell => cell === null);
+  
+  return { 
+    boardWinners, 
+    gameWinner, 
+    currentTurn,
+    currentBoard: isValidBoard ? currentBoard : null
+  };
+};
+
 const initialGameState: GameState = {
   gameState: Array(9).fill(null).map(() => Array(9).fill(null)),
   currentBoard: null,
@@ -82,31 +144,54 @@ const initialGameState: GameState = {
   gameWinner: null,
 };
 
-export const UltimateTicTacToeContext = createContext<UltimateTicTacToeContextType>({
-  gameState: Array(9).fill(null).map(() => Array(9).fill(null)),
-  currentTurn: "X",
-  onPlay: () => {},
-  onUndo: () => {},
-  canUndo: false,
-  currentBoard: null,
-  winner: null,
-  boardWinners: Array(9).fill(null),
-  gameWinner: null,
-});
-
-export const useUltimateTicTacToe = () => useContext(UltimateTicTacToeContext);
-
-interface UltimateTicTacToeProviderProps {
-  children: ReactNode;
-}
-
 export const UltimateTicTacToeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [history, setHistory] = useState<GameState[]>([initialGameState]);
   const [currentIndex, setCurrentIndex] = useState(0);
+
+  // Load initial state from URL
+  useEffect(() => {
+    const state = searchParams.get('state');
+    if (state) {
+      const [boardState, currentBoardStr] = state.split('_');
+      if (boardState) {
+        const boards = decodeGameState(boardState);
+        if (boards) {
+          const currentBoard = currentBoardStr === '-' ? null : parseInt(currentBoardStr);
+          const { boardWinners, gameWinner, currentTurn } = calculateGameState(boards, currentBoard);
+          const newState: GameState = {
+            gameState: boards,
+            currentBoard,
+            currentTurn,
+            boardWinners,
+            gameWinner,
+          };
+          setHistory([newState]);
+          setCurrentIndex(0);
+        }
+      }
+    }
+  }, [searchParams]);
 
   // Current state is always the last state in our valid history
   const currentState = history[currentIndex];
   const { gameState, currentBoard, currentTurn, boardWinners, gameWinner } = currentState;
+
+  const getStateUrl = useCallback(() => {
+    const url = new URL(window.location.href);
+    
+    // Check if any moves have been made
+    const hasAnyMoves = gameState.some(board => board.some(cell => cell !== null));
+    
+    if (hasAnyMoves) {
+      url.searchParams.set('state', encodeGameState(currentState));
+    } else {
+      url.searchParams.delete('state');
+    }
+    
+    return `${window.location.origin}${url.pathname}${url.search}`;
+  }, [currentState, gameState]);
 
   const onUndo = useCallback(() => {
     if (currentIndex > 0) {
@@ -160,9 +245,18 @@ export const UltimateTicTacToeProvider: React.FC<{ children: React.ReactNode }> 
       ...currentState,
       onPlay,
       onUndo,
+      getStateUrl,
       canUndo: currentIndex > 0,
     }}>
       {children}
     </UltimateTicTacToeContext.Provider>
   );
+};
+
+export const useUltimateTicTacToe = () => {
+  const context = useContext(UltimateTicTacToeContext);
+  if (!context) {
+    throw new Error('useUltimateTicTacToe must be used within a UltimateTicTacToeProvider');
+  }
+  return context;
 };
