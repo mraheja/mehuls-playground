@@ -55,7 +55,7 @@ export const TicTacToe: React.FC<TicTacToeProps> = ({
         return (
           <div
             key={index}
-            className={`h-12 w-12 border-2 transform transition-all duration-300 ease-in-out ${
+            className={`h-8 w-8 sm:h-12 sm:w-12 border-2 transform transition-all duration-300 ease-in-out ${
               (isActive && !boardWinner && !gameWinner) ? colors[boardIndex].border : colors[boardIndex].inactiveBorder
             } flex items-center justify-center text-4xl ${
               canPlay ? "cursor-pointer scale-100 hover:scale-105" : "cursor-default"

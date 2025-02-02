@@ -155,7 +155,7 @@ const GameBoard = () => {
   };
 
   const board = (
-    <div className="grid grid-cols-3 gap-3 w-[500px] place-items-center">
+    <div className="grid grid-cols-3 gap-3 w-[350px] sm:w-[500px] place-items-center">
       {Array(9)
         .fill(null)
         .map((_, index) => (
@@ -187,8 +187,8 @@ const GameBoard = () => {
 
   return (
     <div className="flex flex-col items-center gap-8">
-      <div className="relative w-full">
-        <div className={`relative p-2 rounded-xl transition-all duration-500 ${showTurnIndicator ? "bg-white shadow-sm " : ""}`}>
+      <div className="relative">
+        <div className={`sm:w-full w-[370px] relative p-2 rounded-xl transition-all duration-500 ${showTurnIndicator ? "bg-white shadow-sm " : ""}`}>
           <div className={`transition-opacity duration-500 ${showTurnIndicator ? "opacity-100" : visibleBoards >= 0 ? "opacity-30" : "opacity-0"}`}>
             {board}
           </div>
