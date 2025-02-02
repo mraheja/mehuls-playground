@@ -27,15 +27,15 @@ const BoardContainer = ({ index, children, showDottedBorder }: { index: number, 
   const isActive = currentBoard === null || currentBoard === index;
 
   const colors = [
-    "bg-red-50",
-    "bg-blue-50",
-    "bg-green-50",
-    "bg-teal-50",
-    "bg-purple-50",
-    "bg-pink-50",
-    "bg-indigo-50",
-    "bg-orange-50",
-    "bg-yellow-50"
+    "bg-rose-50",      // Modern pink-red
+    "bg-sky-50",       // Fresh light blue
+    "bg-emerald-50",   // Contemporary green
+    "bg-violet-50",    // Trendy purple
+    "bg-amber-50",     // Warm golden
+    "bg-cyan-50",      // Modern turquoise
+    "bg-fuchsia-50",   // Vibrant pink
+    "bg-lime-50",      // Fresh lime
+    "bg-orange-50"     // Bright orange
   ];
 
   return (

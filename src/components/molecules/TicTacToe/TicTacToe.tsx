@@ -3,15 +3,15 @@
 import { useUltimateTicTacToe } from "@/contexts/UltimateTicTacToeContext";
 
 const colors = {
-  0: { bg: "hover:bg-red-100" },
-  1: { bg: "hover:bg-blue-100" },
-  2: { bg: "hover:bg-green-100" },
-  3: { bg: "hover:bg-teal-100" },
-  4: { bg: "hover:bg-purple-100" },
-  5: { bg: "hover:bg-pink-100" },
-  6: { bg: "hover:bg-indigo-100" },
-  7: { bg: "hover:bg-orange-100" },
-  8: { bg: "hover:bg-yellow-100" }
+  0: { bg: "hover:bg-rose-200", border: "border-rose-400", inactiveBorder: "border-rose-200" },      // Modern pink-red
+  1: { bg: "hover:bg-sky-200", border: "border-sky-400", inactiveBorder: "border-sky-200" },       // Fresh light blue
+  2: { bg: "hover:bg-emerald-200", border: "border-emerald-400", inactiveBorder: "border-emerald-200" },   // Contemporary green
+  3: { bg: "hover:bg-violet-200", border: "border-violet-400", inactiveBorder: "border-violet-200" },    // Trendy purple
+  4: { bg: "hover:bg-amber-200", border: "border-amber-400", inactiveBorder: "border-amber-200" },     // Warm golden
+  5: { bg: "hover:bg-cyan-200", border: "border-cyan-400", inactiveBorder: "border-cyan-200" },      // Modern turquoise
+  6: { bg: "hover:bg-fuchsia-200", border: "border-fuchsia-400", inactiveBorder: "border-fuchsia-200" },   // Vibrant pink
+  7: { bg: "hover:bg-lime-200", border: "border-lime-400", inactiveBorder: "border-lime-200" },      // Fresh lime
+  8: { bg: "hover:bg-orange-200", border: "border-orange-400", inactiveBorder: "border-orange-200" }      // Bright orange
 };
 
 export interface TicTacToeProps {
@@ -53,7 +53,7 @@ export const TicTacToe: React.FC<TicTacToeProps> = ({
           <div
             key={index}
             className={`h-12 w-12 border-2 ${
-              isActive && !boardWinner && !gameWinner ? "border-gray-600" : "border-gray-300"
+              (isActive && !boardWinner && !gameWinner) ? colors[boardIndex].border : colors[boardIndex].inactiveBorder
             } flex items-center justify-center text-4xl ${
               canPlay ? "cursor-pointer" : "cursor-default"
             } ${
@@ -78,7 +78,7 @@ export const TicTacToe: React.FC<TicTacToeProps> = ({
           {boardContent}
         </div>
         <div className="absolute inset-0 flex items-center justify-center">
-          <span className="text-8xl font-bold text-indigo-600">{boardWinner}</span>
+          <span className="text-8xl font-bold text-orange-600">{boardWinner}</span>
         </div>
       </div>
     );
