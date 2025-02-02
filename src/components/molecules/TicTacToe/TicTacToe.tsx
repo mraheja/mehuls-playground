@@ -66,7 +66,7 @@ export const TicTacToe: React.FC<TicTacToeProps> = ({
             onMouseEnter={() => canPlay && handleHover(index)}
             onMouseLeave={() => canPlay && handleHover(null)}
           >
-            <span className={`transform transition-transform duration-300 ease-in-out font-bold ${
+            <span className={`transform transition-transform duration-300 ease-in-out font-bold select-none ${
               content === 'X' ? 'text-violet-600' : content === 'O' ? 'text-sky-600' : ''
             }`}>
               {content}
