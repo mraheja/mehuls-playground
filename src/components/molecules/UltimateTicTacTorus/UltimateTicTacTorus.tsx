@@ -217,7 +217,7 @@ const GameBoard = () => {
               : <div className={`${
                 currentTurn === 'X' ? 'text-violet-600' : 'text-sky-600'
               }`}>
-                Player {currentTurn}'s turn
+                Player {currentTurn}&apos;s turn
               </div>
           }
         </div>
