@@ -8,8 +8,20 @@ const BoardContainer = ({ index, children }: { index: number, children: React.Re
   const { currentBoard } = useUltimateTicTacToe();
   const isActive = currentBoard === null || currentBoard === index;
 
+  const colors = [
+    "bg-red-50",
+    "bg-blue-50",
+    "bg-green-50",
+    "bg-yellow-50",
+    "bg-purple-50",
+    "bg-pink-50",
+    "bg-indigo-50",
+    "bg-orange-50",
+    "bg-teal-50"
+  ];
+
   return (
-    <div className={`border-2 p-1 rounded-sm transition-colors duration-200 ${
+    <div className={`border-2 p-1 rounded-sm transition-colors duration-200 ${colors[index]} ${
       isActive ? "border-gray-600" : "border-gray-300"
     }`}>
       {children}
