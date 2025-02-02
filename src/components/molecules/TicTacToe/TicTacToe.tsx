@@ -45,8 +45,8 @@ export const TicTacToe: React.FC<TicTacToeProps> = ({
 
   const boardContent = (
     <div 
-      className={`grid grid-cols-3 gap-1 ${className} ${
-        !boardWinner ? "opacity-100" : "opacity-50"
+      className={`grid grid-cols-3 gap-1 ${className} relative ${
+        !boardWinner ? "opacity-100" : "opacity-30"
       }`}
     >
       {Array(9).fill(null).map((_, index) => {
@@ -66,7 +66,9 @@ export const TicTacToe: React.FC<TicTacToeProps> = ({
             onMouseEnter={() => canPlay && handleHover(index)}
             onMouseLeave={() => canPlay && handleHover(null)}
           >
-            <span className="transform transition-all duration-300 ease-in-out">
+            <span className={`transform transition-transform duration-300 ease-in-out font-bold ${
+              content === 'X' ? 'text-violet-600' : content === 'O' ? 'text-sky-600' : ''
+            }`}>
               {content}
             </span>
           </div>
@@ -75,18 +77,18 @@ export const TicTacToe: React.FC<TicTacToeProps> = ({
     </div>
   );
 
-  if (boardWinner) {
-    return (
-      <div className="relative w-[150px] h-[150px]">
-        <div className="absolute inset-0 opacity-30">
-          {boardContent}
-        </div>
+  return (
+    <div className="relative">
+      {boardContent}
+      {boardWinner && (
         <div className="absolute inset-0 flex items-center justify-center">
-          <span className="text-8xl font-bold text-orange-600 transform transition-all duration-300 ease-in-out opacity-0 scale-0 ${boardWinner ? 'opacity-100 scale-100' : ''}">{boardWinner}</span>
+          <span className={`text-8xl font-bold transform transition-transform duration-300 ease-in-out ${
+            boardWinner === 'X' ? 'text-violet-600' : 'text-sky-600'
+          }`}>
+            {boardWinner}
+          </span>
         </div>
-      </div>
-    );
-  }
-
-  return boardContent;
+      )}
+    </div>
+  );
 };

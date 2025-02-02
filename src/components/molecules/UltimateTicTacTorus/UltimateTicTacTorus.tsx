@@ -40,7 +40,7 @@ const BoardContainer = ({ index, children, showDottedBorder }: { index: number, 
 
   return (
     <div className={`p-1 rounded-sm transform transition-all duration-300 ease-in-out ${colors[index]} 
-    ${showDottedBorder ? "!ring-gray-300 ring-[1px] ring-opacity-100 scale-[1.02]" : "ring-opacity-0 scale-100"} ${isActive ? "scale-[1.02]" : "scale-100"}`}>
+    ${showDottedBorder ? "ring-opacity-100 scale-[1.02]" : "ring-opacity-0 scale-100"} ${isActive ? "scale-[1.02]" : "scale-100"}`}>
       {children}
     </div>
   );
@@ -76,7 +76,7 @@ const GameBoard = () => {
           }
           return prev + 1;
         });
-      }, 100);
+      }, 200);
 
       return () => clearInterval(timer);
     }
@@ -212,7 +212,12 @@ const GameBoard = () => {
             ? `Player ${gameWinner} wins!`
             : gameState.every(board => board.every(cell => cell === null))
               ? "Welcome to Ultimate Tic-Tac-Torus!"
-              : `Player ${currentTurn}'s Turn`}
+              : <div className={`${
+                currentTurn === 'X' ? 'text-violet-600' : 'text-sky-600'
+              }`}>
+                Player {currentTurn}'s turn
+              </div>
+          }
         </div>
         {canUndo && (
           <div className={`absolute left-1/2 -translate-x-1/2 -bottom-7 flex gap-2 ${showTurnIndicator ? "opacity-100" : "opacity-0"}`}>
