@@ -2,6 +2,7 @@
 
 import { TicTacToe } from "../TicTacToe/TicTacToe";
 import { useState, useEffect } from "react";
+import { UltimateTicTacToeProvider } from "@/contexts/UltimateTicTacToeContext";
 
 export interface UltimateTicTacTorusProps {
   className?: string;
@@ -25,7 +26,7 @@ export const UltimateTicTacTorus: React.FC<UltimateTicTacTorusProps> = ({
         .fill(null)
         .map((_, index) => (
           <div className="border-2 border-gray-600 p-1 rounded-sm" key={index}>
-            <TicTacToe />
+            <TicTacToe boardIndex={index} />
           </div>
         ))}
     </div>
@@ -43,20 +44,22 @@ export const UltimateTicTacTorus: React.FC<UltimateTicTacTorusProps> = ({
   ];
 
   return (
-    <div className="relative">
-      <div className={`transition-opacity duration-500 ${visibleBoards >= 0 ? "opacity-100" : "opacity-0"}`}>
-        {board}
-      </div>
-      {absoluteBoards.map((position, index) => (
-        <div
-          key={index}
-          className={`absolute ${position} transition-opacity duration-500 ${
-            index < visibleBoards ? "opacity-30" : "opacity-0"
-          }`}
-        >
+    <UltimateTicTacToeProvider>
+      <div className="relative">
+        <div className={`transition-opacity duration-500 ${visibleBoards >= 0 ? "opacity-100" : "opacity-0"}`}>
           {board}
         </div>
-      ))}
-    </div>
+        {absoluteBoards.map((position, index) => (
+          <div
+            key={index}
+            className={`absolute ${position} transition-opacity duration-500 ${
+              index < visibleBoards ? "opacity-30" : "opacity-0"
+            }`}
+          >
+            {board}
+          </div>
+        ))}
+      </div>
+    </UltimateTicTacToeProvider>
   );
 };
