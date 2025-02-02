@@ -16,22 +16,53 @@ interface UltimateTicTacToeContextType {
 }
 
 const calculateWinner = (squares: (Player | null)[]): Player | null => {
-  const lines = [
-    [0, 1, 2],
-    [3, 4, 5],
-    [6, 7, 8],
-    [0, 3, 6],
-    [1, 4, 7],
-    [2, 5, 8],
-    [0, 4, 8],
-    [2, 4, 6],
+  // Standard win conditions
+  const standardLines = [
+    [0, 1, 2], // Top row
+    [3, 4, 5], // Middle row
+    [6, 7, 8], // Bottom row
+    [0, 3, 6], // Left column
+    [1, 4, 7], // Middle column
+    [2, 5, 8], // Right column
+    [0, 4, 8], // Diagonal
+    [2, 4, 6], // Diagonal
   ];
 
-  for (const [a, b, c] of lines) {
+  // Torus-style wrapping win conditions
+  const torusLines = [
+    // Wrapping rows
+    [2, 0, 1],
+    [5, 3, 4],
+    [8, 6, 7],
+    // Wrapping columns
+    [6, 0, 3],
+    [7, 1, 4],
+    [8, 2, 5],
+    // Wrapping diagonals
+    [6, 4, 2], // Bottom-left to top-right wrapping
+    [8, 4, 0], // Bottom-right to top-left wrapping
+    [2, 4, 6], // Top-right to bottom-left wrapping
+    [0, 4, 8], // Top-left to bottom-right wrapping
+    // Additional broken diagonals
+    [1, 5, 0], // Top-middle, right-middle, top-left wrap
+    [5, 0, 4], // Right-middle, top-left, center wrap
+    [3, 7, 2], // Left-middle, bottom-middle, top-right wrap
+    [7, 2, 4], // Bottom-middle, top-right, center wrap
+    [1, 3, 8], // Top-middle, left-middle, bottom-right wrap
+    [3, 8, 4], // Left-middle, bottom-right, center wrap
+    [5, 7, 6], // Right-middle, bottom-middle, bottom-left wrap
+    [7, 6, 4], // Bottom-middle, bottom-left, center wrap
+  ];
+
+  // Check all win conditions
+  const allLines = [...standardLines, ...torusLines];
+  
+  for (const [a, b, c] of allLines) {
     if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
       return squares[a];
     }
   }
+
   return null;
 };
 
