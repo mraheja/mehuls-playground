@@ -48,7 +48,7 @@ const BoardContainer = ({ index, children, showDottedBorder }: { index: number, 
 };
 
 const GameBoard = () => {
-  const { currentTurn, gameState, boardWinners, gameWinner, onUndo, onReset, getStateUrl, canUndo } = useUltimateTicTacToe();
+  const { currentTurn, gameState, boardWinners, gameWinner, onUndo, getStateUrl, canUndo } = useUltimateTicTacToe();
   const [visibleBoards, setVisibleBoards] = useState(-1);
   const [showTurnIndicator, setShowTurnIndicator] = useState(false);
   const [hoveredMove, setHoveredMove] = useState<{board: number, position: number} | null>(null);
@@ -74,50 +74,42 @@ const GameBoard = () => {
         setVisibleBoards(prev => {
           if (prev >= 8) {
             clearInterval(timer);
+            setShowTurnIndicator(true);
+            setIsLoading(false);
             return prev;
           }
           return prev + 1;
         });
-      }, 200);
-
+      }, 100);
       return () => clearInterval(timer);
     }
   }, [hasUrlState]);
 
   useEffect(() => {
-    if (!hasUrlState) {
-      // Only do this animation if not loading from URL
-      if (visibleBoards >= 8) {
-        const timer = setTimeout(() => {
-          setShowTurnIndicator(true);
-          setIsLoading(false);
-        }, 500);
-        return () => clearTimeout(timer);
-      }
+    if (!confettiRef.current) {
+      confettiRef.current = new JSConfetti();
     }
-  }, [visibleBoards, hasUrlState]);
 
-  useEffect(() => {
-    if (showShareSuccess) {
-      const timer = setTimeout(() => setShowShareSuccess(false), 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [showShareSuccess]);
-
-  useEffect(() => {
-    confettiRef.current = new JSConfetti();
-  }, []);
-
-  useEffect(() => {
     if (gameWinner && gameWinner !== lastWinnerRef.current) {
-      lastWinnerRef.current = gameWinner;
-      confettiRef.current?.addConfetti({
+      confettiRef.current.addConfetti({
         emojis: ['🎉', '🎊', '🏆'],
         emojiSize: 30,
-        confettiNumber: 50,
+        confettiNumber: 100,
       });
+      lastWinnerRef.current = gameWinner;
     }
   }, [gameWinner]);
+
+  const handleShare = () => {
+    navigator.clipboard.writeText(getStateUrl());
+    setShowShareSuccess(true);
+    setTimeout(() => setShowShareSuccess(false), 2000);
+  };
+
+  const handleReset = () => {
+    setShowResetConfirm(false);
+    window.location.href = window.location.pathname;
+  };
 
   const handleSquareHover = (boardIndex: number, position: number | null) => {
     if (isLoading) return;
@@ -150,16 +142,6 @@ const GameBoard = () => {
 
   const nextBoard = getNextBoard();
   const showAllDotted = hoveredMove && nextBoard === null;
-
-  const handleShare = () => {
-    navigator.clipboard.writeText(getStateUrl());
-    setShowShareSuccess(true);
-  };
-
-  const handleReset = () => {
-    onReset();
-    setShowResetConfirm(false);
-  };
 
   const board = (
     <div className="grid grid-cols-3 gap-1 sm:gap-3 w-[350px] sm:w-[500px] place-items-center">

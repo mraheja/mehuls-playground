@@ -14,7 +14,6 @@ interface GameState {
 interface UltimateTicTacToeContextType extends GameState {
   onPlay: (boardIndex: number, position: number) => void;
   onUndo: () => void;
-  onReset: () => void;
   getStateUrl: () => string;
   canUndo: boolean;
 }
@@ -200,11 +199,6 @@ export const UltimateTicTacToeProvider: React.FC<{ children: React.ReactNode }> 
     }
   }, [currentIndex]);
 
-  const onReset = useCallback(() => {
-    setHistory([initialGameState]);
-    setCurrentIndex(0);
-  }, []);
-
   const onPlay = useCallback((boardIndex: number, position: number) => {
     if (gameWinner) return;
     
@@ -247,16 +241,13 @@ export const UltimateTicTacToeProvider: React.FC<{ children: React.ReactNode }> 
   }, [currentBoard, currentTurn, gameState, boardWinners, gameWinner, history, currentIndex]);
 
   return (
-    <UltimateTicTacToeContext.Provider
-      value={{
-        ...currentState,
-        onPlay,
-        onUndo,
-        onReset,
-        getStateUrl,
-        canUndo: currentIndex > 0,
-      }}
-    >
+    <UltimateTicTacToeContext.Provider value={{
+      ...currentState,
+      onPlay,
+      onUndo,
+      getStateUrl,
+      canUndo: currentIndex > 0,
+    }}>
       {children}
     </UltimateTicTacToeContext.Provider>
   );
