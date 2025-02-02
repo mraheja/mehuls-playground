@@ -5,4 +5,5 @@ export const PAGES = {
   INFINITE_GIRAFFE: "/infinite-giraffe",
   SWAYING_SPROUT: "/swaying-sprout",
   PINKY_PROMISE: "/pinky-promise",
+  ULTIMATE_TIC_TAC_TORUS: "/ultimate-tic-tac-torus",
 };

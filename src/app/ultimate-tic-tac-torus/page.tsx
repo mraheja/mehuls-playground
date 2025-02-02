@@ -2,6 +2,12 @@ import { UltimateTicTacTorus } from "@/components/molecules/UltimateTicTacTorus/
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Suspense } from "react";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Ultimate Tic Tac Torus",
+  description: "A combination of Ultimate Tic-Tac-Toe and Tic-Tac-Torus - a challenging strategic game where boards wrap around like a donut!",
+};
 
 const LoadingSpinner = () => (
   <div className="flex items-center justify-center">
