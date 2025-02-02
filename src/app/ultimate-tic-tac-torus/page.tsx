@@ -1,4 +1,6 @@
 import { UltimateTicTacTorus } from "@/components/molecules/UltimateTicTacTorus/UltimateTicTacTorus";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
 import { Suspense } from "react";
 
 const LoadingSpinner = () => (
@@ -11,7 +13,12 @@ const UltimateTicTacTorusPage = () => {
   return (
     <div className="flex justify-center items-center min-h-[100dvh] overflow-clip bg-gray-100">
       <Suspense fallback={<LoadingSpinner />}>
-        <UltimateTicTacTorus />
+        <>
+          <Link href="/ultimate-tic-tac-torus/rules" className="absolute top-4 right-4 z-10">
+            <Button variant="outline">Rules</Button>
+          </Link>
+          <UltimateTicTacTorus />
+        </>
       </Suspense>
     </div>
   );

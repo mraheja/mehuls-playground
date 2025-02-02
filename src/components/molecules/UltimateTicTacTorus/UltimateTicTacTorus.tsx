@@ -3,9 +3,10 @@
 import { TicTacToe } from "../TicTacToe/TicTacToe";
 import { useState, useEffect, useRef } from "react";
 import { UltimateTicTacToeProvider, useUltimateTicTacToe } from "@/contexts/UltimateTicTacToeContext";
-import { UndoIcon, Share2Icon, CheckIcon } from "lucide-react";
+import { UndoIcon, Share2Icon, CheckIcon, RefreshCwIcon } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import JSConfetti from 'js-confetti';
+import * as Dialog from '@radix-ui/react-dialog';
 import * as Tooltip from '@radix-ui/react-tooltip';
 
 // Function to calculate relative board movement with torus wrapping
@@ -47,11 +48,12 @@ const BoardContainer = ({ index, children, showDottedBorder }: { index: number, 
 };
 
 const GameBoard = () => {
-  const { currentTurn, gameState, boardWinners, gameWinner, onUndo, getStateUrl, canUndo } = useUltimateTicTacToe();
+  const { currentTurn, gameState, boardWinners, gameWinner, onUndo, onReset, getStateUrl, canUndo } = useUltimateTicTacToe();
   const [visibleBoards, setVisibleBoards] = useState(-1);
   const [showTurnIndicator, setShowTurnIndicator] = useState(false);
   const [hoveredMove, setHoveredMove] = useState<{board: number, position: number} | null>(null);
   const [showShareSuccess, setShowShareSuccess] = useState(false);
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const confettiRef = useRef<JSConfetti | null>(null);
   const lastWinnerRef = useRef<string | null>(null);
@@ -154,6 +156,11 @@ const GameBoard = () => {
     setShowShareSuccess(true);
   };
 
+  const handleReset = () => {
+    onReset();
+    setShowResetConfirm(false);
+  };
+
   const board = (
     <div className="grid grid-cols-3 gap-1 sm:gap-3 w-[350px] sm:w-[500px] place-items-center">
       {Array(9)
@@ -221,67 +228,132 @@ const GameBoard = () => {
               </div>
           }
         </div>
-        <div className={`sm:absolute relative mt-6 sm:mt-0 left-1/2 -translate-x-1/2 sm:-bottom-7 flex gap-3 w-full sm:w-auto justify-center transition-opacity duration-500 ${showTurnIndicator ? "opacity-100" : "opacity-0"}`}>
-          <Tooltip.Root>
-            <Tooltip.Trigger asChild>
-              <button
-                onClick={onUndo}
-                disabled={!canUndo}
-                className={`sm:text-xs text-base font-medium sm:px-4 px-6 sm:py-2 py-3 rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg
-                  ${canUndo 
-                    ? "bg-violet-50 hover:bg-violet-100 text-violet-700" 
-                    : "bg-gray-50 text-gray-400 cursor-not-allowed"
-                  } flex-1 sm:flex-none`}
-              >
-                <span className="hidden sm:block">
-                  <UndoIcon className={`h-4 w-4 ${canUndo ? "stroke-violet-700" : "stroke-gray-400"}`} />
-                </span>
-                <span className="sm:hidden">Undo</span>
-              </button>
-            </Tooltip.Trigger>
-            <Tooltip.Portal>
-              <Tooltip.Content
-                className="bg-white px-3 py-1.5 rounded-lg shadow-md text-sm z-50"
-                sideOffset={5}
-                side="bottom"
-                align="center"
-              >
-                Undo last move
-                <Tooltip.Arrow className="fill-white" />
-              </Tooltip.Content>
-            </Tooltip.Portal>
-          </Tooltip.Root>
-          <Tooltip.Root>
-            <Tooltip.Trigger asChild>
-              <button
-                onClick={handleShare}
-                className="sm:text-xs text-base font-medium sm:px-4 px-6 sm:py-2 py-3 rounded-lg transition-colors duration-200 
-                  bg-sky-50 hover:bg-sky-100 text-sky-700 shadow-md hover:shadow-lg flex-1 sm:flex-none"
-              >
-                <span className="hidden sm:block">
-                  {showShareSuccess ? (
-                    <CheckIcon className="h-4 w-4 stroke-sky-700" />
-                  ) : (
-                    <Share2Icon className="h-4 w-4 stroke-sky-700" />
-                  )}
-                </span>
-                <span className="sm:hidden">
-                  {showShareSuccess ? "Copied!" : "Share"}
-                </span>
-              </button>
-            </Tooltip.Trigger>
-            <Tooltip.Portal>
-              <Tooltip.Content
-                className="bg-white px-3 py-1.5 rounded-lg shadow-md text-sm z-50"
-                sideOffset={5}
-                side="bottom"
-                align="center"
-              >
-                {showShareSuccess ? "Copied!" : "Copy link to share"}
-                <Tooltip.Arrow className="fill-white" />
-              </Tooltip.Content>
-            </Tooltip.Portal>
-          </Tooltip.Root>
+        <div className={`sm:absolute relative mt-6 sm:mt-0 left-1/2 -translate-x-1/2 sm:-bottom-7 flex flex-col sm:flex-row gap-3 w-full sm:w-auto justify-center transition-opacity duration-500 ${showTurnIndicator ? "opacity-100" : "opacity-0"}`}>
+          <div className="flex gap-3">
+            <Tooltip.Provider delayDuration={100}>
+              <Tooltip.Root>
+                <Tooltip.Trigger asChild>
+                  <button
+                    onClick={onUndo}
+                    disabled={!canUndo}
+                    className={`sm:text-xs text-base font-medium sm:px-4 px-6 sm:py-2 py-3 rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg
+                      ${canUndo 
+                        ? "bg-violet-50 hover:bg-violet-100 text-violet-700" 
+                        : "bg-gray-50 text-gray-400 cursor-not-allowed"
+                      } flex-1 sm:flex-none order-1`}
+                  >
+                    <span className="hidden sm:block">
+                      <UndoIcon className={`h-4 w-4 ${canUndo ? "stroke-violet-700" : "stroke-gray-400"}`} />
+                    </span>
+                    <span className="sm:hidden">Undo</span>
+                  </button>
+                </Tooltip.Trigger>
+                <div className="hidden sm:block">
+                  <Tooltip.Portal>
+                    <Tooltip.Content
+                      className="bg-white px-3 py-1.5 rounded-lg shadow-md text-sm z-50"
+                      sideOffset={5}
+                      side="bottom"
+                      align="center"
+                    >
+                      Undo last move
+                      <Tooltip.Arrow className="fill-white" />
+                    </Tooltip.Content>
+                  </Tooltip.Portal>
+                </div>
+              </Tooltip.Root>
+
+              <Dialog.Root open={showResetConfirm} onOpenChange={setShowResetConfirm}>
+                <Tooltip.Root>
+                  <Tooltip.Trigger asChild>
+                    <Dialog.Trigger asChild>
+                      <button
+                        className="sm:text-xs text-base font-medium sm:px-4 px-6 sm:py-2 py-3 rounded-lg transition-colors duration-200 
+                          bg-red-50 hover:bg-red-100 text-red-700 shadow-md hover:shadow-lg flex-1 sm:flex-none order-2"
+                      >
+                        <span className="hidden sm:block">
+                          <RefreshCwIcon className="h-4 w-4 stroke-red-700" />
+                        </span>
+                        <span className="sm:hidden">Reset</span>
+                      </button>
+                    </Dialog.Trigger>
+                  </Tooltip.Trigger>
+                  <div className="hidden sm:block">
+                    <Tooltip.Portal>
+                      <Tooltip.Content
+                        className="bg-white px-3 py-1.5 rounded-lg shadow-md text-sm z-50"
+                        sideOffset={5}
+                        side="bottom"
+                        align="center"
+                      >
+                        Reset game
+                        <Tooltip.Arrow className="fill-white" />
+                      </Tooltip.Content>
+                    </Tooltip.Portal>
+                  </div>
+                </Tooltip.Root>
+                <Dialog.Portal>
+                  <Dialog.Overlay className="fixed inset-0 bg-black/50 z-[100]" />
+                  <Dialog.Content className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-white rounded-xl p-6 shadow-lg max-w-md w-[90%] focus:outline-none z-[101]">
+                    <Dialog.Title className="text-lg font-bold mb-4">Reset Game</Dialog.Title>
+                    <Dialog.Description className="text-gray-600 mb-6">
+                      Are you sure you want to reset the game? This action cannot be undone.
+                    </Dialog.Description>
+                    <div className="flex gap-3 justify-end">
+                      <button
+                        onClick={() => setShowResetConfirm(false)}
+                        className="px-4 py-2 rounded-lg transition-colors duration-200 
+                          bg-gray-100 hover:bg-gray-200 text-gray-700"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        onClick={handleReset}
+                        className="px-4 py-2 rounded-lg transition-colors duration-200 
+                          bg-red-600 hover:bg-red-700 text-white"
+                      >
+                        Reset
+                      </button>
+                    </div>
+                  </Dialog.Content>
+                </Dialog.Portal>
+              </Dialog.Root>
+
+              <Tooltip.Root>
+                <Tooltip.Trigger asChild>
+                  <button
+                    onClick={handleShare}
+                    className="sm:text-xs text-base font-medium sm:px-4 px-6 sm:py-2 py-3 rounded-lg transition-colors duration-200 
+                      bg-sky-50 hover:bg-sky-100 text-sky-700 shadow-md hover:shadow-lg flex-1 sm:flex-none order-3"
+                  >
+                    <span className="hidden sm:block">
+                      {showShareSuccess ? (
+                        <CheckIcon className="h-4 w-4 stroke-sky-700" />
+                      ) : (
+                        <Share2Icon className="h-4 w-4 stroke-sky-700" />
+                      )}
+                    </span>
+                    <span className="sm:hidden">
+                      {showShareSuccess ? "Copied!" : "Share"}
+                    </span>
+                  </button>
+                </Tooltip.Trigger>
+                <div className="hidden sm:block">
+                  <Tooltip.Portal>
+                    <Tooltip.Content
+                      className="bg-white px-3 py-1.5 rounded-lg shadow-md text-sm z-50"
+                      sideOffset={5}
+                      side="bottom"
+                      align="center"
+                    >
+                      {showShareSuccess ? "Copied!" : "Copy link to share"}
+                      <Tooltip.Arrow className="fill-white" />
+                    </Tooltip.Content>
+                  </Tooltip.Portal>
+                </div>
+              </Tooltip.Root>
+            </Tooltip.Provider>
+          </div>
         </div>
       </div>
     </div>
