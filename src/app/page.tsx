@@ -4,6 +4,9 @@ import { PAGES } from "../constant/pages";
 export default function Home() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-center gap-y-3 p-24 bg-muted">
+      <a href={PAGES.ULTIMATE_TIC_TAC_TORUS}>
+        <Button>Ultimate Tic Tac Torus</Button>
+      </a>
       <a href={PAGES.EYE_TRACKER}>
         <Button>Eye Tracker</Button>
       </a>
