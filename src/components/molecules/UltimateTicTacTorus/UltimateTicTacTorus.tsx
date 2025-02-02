@@ -1,10 +1,12 @@
 'use client'
 
 import { TicTacToe } from "../TicTacToe/TicTacToe";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { UltimateTicTacToeProvider, useUltimateTicTacToe } from "@/contexts/UltimateTicTacToeContext";
 import { UndoIcon, Share2Icon, CheckIcon } from "lucide-react";
 import { useSearchParams } from "next/navigation";
+import JSConfetti from 'js-confetti';
+import * as Tooltip from '@radix-ui/react-tooltip';
 
 // Function to calculate relative board movement with torus wrapping
 const getRelativeBoard = (currentBoardIndex: number, position: number): number => {
@@ -51,6 +53,8 @@ const GameBoard = () => {
   const [hoveredMove, setHoveredMove] = useState<{board: number, position: number} | null>(null);
   const [showShareSuccess, setShowShareSuccess] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const confettiRef = useRef<JSConfetti | null>(null);
+  const lastWinnerRef = useRef<string | null>(null);
 
   // Check if we're loading from a URL state
   const searchParams = useSearchParams();
@@ -97,6 +101,21 @@ const GameBoard = () => {
       return () => clearTimeout(timer);
     }
   }, [showShareSuccess]);
+
+  useEffect(() => {
+    confettiRef.current = new JSConfetti();
+  }, []);
+
+  useEffect(() => {
+    if (gameWinner && gameWinner !== lastWinnerRef.current) {
+      lastWinnerRef.current = gameWinner;
+      confettiRef.current?.addConfetti({
+        emojis: ['🎉', '🎊', '🏆'],
+        emojiSize: 30,
+        confettiNumber: 50,
+      });
+    }
+  }, [gameWinner]);
 
   const handleSquareHover = (boardIndex: number, position: number | null) => {
     if (isLoading) return;
@@ -169,7 +188,7 @@ const GameBoard = () => {
   return (
     <div className="flex flex-col items-center gap-8">
       <div className="relative w-full">
-        <div className={`relative p-2 rounded-xl shadow-sm transition-all duration-500 ${showTurnIndicator ? "bg-white" : ""}`}>
+        <div className={`relative p-2 rounded-xl transition-all duration-500 ${showTurnIndicator ? "bg-white shadow-sm " : ""}`}>
           <div className={`transition-opacity duration-500 ${showTurnIndicator ? "opacity-100" : visibleBoards >= 0 ? "opacity-30" : "opacity-0"}`}>
             {board}
           </div>
@@ -197,26 +216,54 @@ const GameBoard = () => {
         </div>
         {canUndo && (
           <div className={`absolute left-1/2 -translate-x-1/2 -bottom-7 flex gap-2 ${showTurnIndicator ? "opacity-100" : "opacity-0"}`}>
-            <button
-              onClick={onUndo}
-              className="text-xs font-medium px-3 py-1 rounded-b-lg transition-all duration-200 
-                bg-gray-400 text-gray-700 hover:bg-gray-700 shadow-sm -translate-y-2"
-            >
-              <UndoIcon className="h-3 w-3 stroke-white" />
-            </button>
-    
-          <button
-            onClick={handleShare}
-            className="text-xs font-medium px-3 py-1 rounded-b-lg transition-all duration-200 
-              bg-gray-400 text-gray-700 hover:bg-gray-700 shadow-sm -translate-y-2"
-          >
-            {showShareSuccess ? (
-              <CheckIcon className="h-3 w-3 stroke-white" />
-            ) : (
-              <Share2Icon className="h-3 w-3 stroke-white" />
-            )}
-          </button>
-        </div>
+            <Tooltip.Root>
+              <Tooltip.Trigger asChild>
+                <button
+                  onClick={onUndo}
+                  className="text-xs font-medium px-3 py-1 rounded-b-lg transition-all duration-200 
+                    bg-gray-400 text-gray-700 hover:bg-gray-700 shadow-sm -translate-y-2"
+                >
+                  <UndoIcon className="h-3 w-3 stroke-white" />
+                </button>
+              </Tooltip.Trigger>
+              <Tooltip.Portal>
+                <Tooltip.Content
+                  className="z-50 select-none rounded-lg bg-white px-3 py-2 text-sm leading-none shadow-md animate-in fade-in-0 zoom-in-95"
+                  sideOffset={10}
+                  side="bottom"
+                >
+                  Undo last move
+                  <Tooltip.Arrow className="fill-white" />
+                </Tooltip.Content>
+              </Tooltip.Portal>
+            </Tooltip.Root>
+
+            <Tooltip.Root>
+              <Tooltip.Trigger asChild>
+                <button
+                  onClick={handleShare}
+                  className="text-xs font-medium px-3 py-1 rounded-b-lg transition-all duration-200 
+                    bg-gray-400 text-gray-700 hover:bg-gray-700 shadow-sm -translate-y-2"
+                >
+                  {showShareSuccess ? (
+                    <CheckIcon className="h-3 w-3 stroke-white" />
+                  ) : (
+                    <Share2Icon className="h-3 w-3 stroke-white" />
+                  )}
+                </button>
+              </Tooltip.Trigger>
+              <Tooltip.Portal>
+                <Tooltip.Content
+                  className="z-50 select-none rounded-lg bg-white px-3 py-2 text-sm leading-none shadow-md animate-in fade-in-0 zoom-in-95"
+                  sideOffset={10}
+                  side="bottom"
+                >
+                  {showShareSuccess ? "Copied!" : "Share game state"}
+                  <Tooltip.Arrow className="fill-white" />
+                </Tooltip.Content>
+              </Tooltip.Portal>
+            </Tooltip.Root>
+          </div>
         )}
       </div>
     </div>
