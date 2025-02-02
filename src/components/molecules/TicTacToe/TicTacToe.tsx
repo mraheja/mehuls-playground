@@ -18,26 +18,33 @@ export interface TicTacToeProps {
   boardIndex: number;
   className?: string;
   onHoverSquare?: (position: number | null) => void;
+  disabled?: boolean;
 }
 
 export const TicTacToe: React.FC<TicTacToeProps> = ({ 
   boardIndex,
   className,
-  onHoverSquare
+  onHoverSquare,
+  disabled
 }) => {
   const { gameState, currentTurn, onPlay, currentBoard, boardWinners } = useUltimateTicTacToe();
   const isActive = currentBoard === null || currentBoard === boardIndex;
   const boardWinner = boardWinners[boardIndex];
 
   const handleHover = (position: number | null) => {
-    if (!isActive || boardWinner || (position !== null && gameState[boardIndex][position])) return;
+    if (disabled || !isActive || boardWinner || (position !== null && gameState[boardIndex][position])) return;
     onHoverSquare?.(position);
+  };
+
+  const handleClick = (position: number) => {
+    if (disabled || !isActive || boardWinner || gameState[boardIndex][position]) return;
+    onPlay(boardIndex, position);
   };
 
   const boardContent = (
     <div 
       className={`grid grid-cols-3 gap-1 ${className} ${
-        isActive && !boardWinner ? "opacity-100" : "opacity-50"
+        !boardWinner ? "opacity-100" : "opacity-50"
       }`}
     >
       {Array(9).fill(null).map((_, index) => (
@@ -46,9 +53,9 @@ export const TicTacToe: React.FC<TicTacToeProps> = ({
           className={`h-12 w-12 border-2 ${
             isActive && !boardWinner ? "border-gray-600" : "border-gray-300"
           } flex items-center justify-center text-4xl cursor-pointer rounded-md ${
-            isActive && !gameState[boardIndex][index] && !boardWinner ? colors[boardIndex].bg : ""
+            !gameState[boardIndex][index] && !boardWinner && !disabled ? colors[boardIndex].bg : ""
           }`}
-          onClick={() => isActive && !boardWinner && onPlay(boardIndex, index)}
+          onClick={() => handleClick(index)}
           onMouseEnter={() => handleHover(index)}
           onMouseLeave={() => handleHover(null)}
         >

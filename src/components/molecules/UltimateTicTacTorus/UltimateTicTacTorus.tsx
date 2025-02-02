@@ -35,9 +35,8 @@ const BoardContainer = ({ index, children, showDottedBorder }: { index: number, 
   ];
 
   return (
-    <div className={`border-2 p-1 rounded-sm transition-all duration-200 ${colors[index]} ${
-      isActive ? "border-gray-600" : "border-gray-300"
-    } ${showDottedBorder ? "!border-dotted !border-gray-600 !opacity-100" : ""}`}>
+    <div className={`border-2 p-1 rounded-sm transition-all duration-200 border-gray-600 ${colors[index]} 
+    ${showDottedBorder ? "!border-dotted" : ""}`}>
       {children}
     </div>
   );
@@ -48,10 +47,19 @@ const GameBoard = () => {
   const [visibleBoards, setVisibleBoards] = useState(-1);
   const [showTurnIndicator, setShowTurnIndicator] = useState(false);
   const [hoveredMove, setHoveredMove] = useState<{board: number, position: number} | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const timer = setInterval(() => {
-      setVisibleBoards((prev) => (prev < 8 ? prev + 1 : prev));
+      setVisibleBoards((prev) => {
+        if (prev === 7) {
+          clearInterval(timer);
+          setTimeout(() => {
+            setIsLoading(false);
+          }, 500); // Give a little extra time after the last board appears
+        }
+        return prev < 8 ? prev + 1 : prev;
+      });
     }, 200);
     return () => clearInterval(timer);
   }, []);
@@ -65,6 +73,7 @@ const GameBoard = () => {
   }, [visibleBoards]);
 
   const handleSquareHover = (boardIndex: number, position: number | null) => {
+    if (isLoading) return;
     if (position === null) {
       setHoveredMove(null);
     } else {
@@ -108,6 +117,7 @@ const GameBoard = () => {
             <TicTacToe 
               boardIndex={index}
               onHoverSquare={(position) => handleSquareHover(index, position)}
+              disabled={isLoading}
             />
           </BoardContainer>
         ))}
