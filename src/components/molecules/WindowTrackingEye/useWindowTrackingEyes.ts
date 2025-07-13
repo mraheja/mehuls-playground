@@ -165,7 +165,7 @@ export function useWindowTrackingEyes() {
       const now = Date.now();
       setOtherWindows((prev) => {
         const newMap = new Map(prev);
-        for (const [id, data] of newMap) {
+        for (const [id, data] of Array.from(newMap)) {
           if (now - data.lastSeen > 3000) {
             newMap.delete(id);
           }

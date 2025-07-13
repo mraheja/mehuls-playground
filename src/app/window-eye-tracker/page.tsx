@@ -33,7 +33,7 @@ const WindowEyeTracker = () => {
         <div className="flex flex-col items-center gap-1 mb-2">
           <div className="text-sm text-gray-600 text-center">{connectionStatus}</div>
           <div className="text-xs text-gray-500 text-center max-w-md">
-            Open this page in multiple windows to see the eyes track each other! Each eye will look at the other window's eye position.
+            Open this page in multiple windows to see the eyes track each other! Each eye will look at the other window&apos;s eye position.
           </div>
           {otherWindows.size > 0 && (
             <div className="text-xs text-green-600 text-center">Active connections: {otherWindows.size}</div>
