@@ -10,6 +10,9 @@ export default function Home() {
       <a href={PAGES.EYE_TRACKER}>
         <Button>Eye Tracker</Button>
       </a>
+      <a href={PAGES.WINDOW_EYE_TRACKER}>
+        <Button>Eye Tracker 2</Button>
+      </a>
       <a href={PAGES.SCROLL_GEAR}>
         <Button>Scroll Gear</Button>
       </a>
